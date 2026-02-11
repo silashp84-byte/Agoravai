@@ -21,6 +21,9 @@ const getAlertColor = (type: AlertType) => {
       return '#EF4444'; // Tailwind red-500
     case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
       return '#F59E0B'; // Tailwind yellow-500
+    case AlertType.TARGET_LINE_CONFIRMATION_BULLISH:
+    case AlertType.TARGET_LINE_CONFIRMATION_BEARISH:
+      return '#8B5CF6'; // Tailwind purple-500
     default:
       return '#60A5FA'; // Default blue
   }

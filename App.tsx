@@ -5,7 +5,7 @@ import AlertSettings from './components/AlertSettings';
 import Chart from './components/Chart';
 import AlertDisplay from './components/AlertDisplay';
 import { getInitialCandleData, subscribeToMarketData, unsubscribeFromMarketData } from './services/marketDataService';
-import { calculateAllIndicators, checkForBuyCallAlert, checkForSellPutAlert, checkForEarlyPullbackAlert } from './utils/calculations';
+import { calculateAllIndicators, checkForBuyCallAlert, checkForSellPutAlert, checkForEarlyPullbackAlert, checkForTargetLineConfirmationAlert } from './utils/calculations';
 import { CandleData, IndicatorData, SupportResistance, Alert, AlertType, AssetMonitorState } from './types';
 import { MOCK_ASSETS, CHART_DATA_LIMIT, TIMEFRAME_OPTIONS, ALERT_SOUND_PATH, ALERT_DURATION_MS } from './constants';
 import { format } from 'date-fns';
@@ -40,6 +40,14 @@ const App: React.FC = () => {
   });
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  // New state for dynamic target line
+  const [targetLineValues, setTargetLineValues] = useState<Record<string, number | null>>(() => {
+    const initialTargetState: Record<string, number | null> = {};
+    MOCK_ASSETS.forEach(asset => {
+      initialTargetState[asset] = null;
+    });
+    return initialTargetState;
+  });
 
   // Alert settings states
   const [enablePushNotifications, setEnablePushNotifications] = useState<boolean>(false);
@@ -117,6 +125,7 @@ const App: React.FC = () => {
       const currentIndicator = indicators.length > 0 ? indicators[indicators.length - 1] : null;
       const prevIndicator = previousIndicatorDataRef.current[asset] || null;
       const previousCandles = updatedCandleData.slice(0, -1); // All candles except the very last one (newCandle)
+      const currentTargetLineValueForAsset = targetLineValues[asset]; // Get the most recent target line for this asset
 
       // Check for alerts for this asset
       if (currentIndicator && updatedCandleData.length > 1) { // Ensure enough data for checks
@@ -134,6 +143,10 @@ const App: React.FC = () => {
           const earlyPullbackAlert = checkForEarlyPullbackAlert(asset, newCandle, previousCandles, currentIndicator);
           if (earlyPullbackAlert) addAlert(earlyPullbackAlert);
         }
+
+        // NEW: Check for Target Line Confirmation Alert
+        const targetLineConfirmAlert = checkForTargetLineConfirmationAlert(asset, newCandle, previousCandles, currentTargetLineValueForAsset);
+        if (targetLineConfirmAlert) addAlert(targetLineConfirmAlert);
       }
 
       previousIndicatorDataRef.current = {
@@ -150,7 +163,7 @@ const App: React.FC = () => {
         },
       };
     });
-  }, [addAlert, enableEarlyPullbackAlerts]);
+  }, [addAlert, enableEarlyPullbackAlerts, targetLineValues]); // Depend on targetLineValues now
 
   const handleSelectAsset = useCallback((asset: string) => {
     setSelectedAsset(asset);
@@ -162,6 +175,7 @@ const App: React.FC = () => {
     setAllAssetsData({}); // Clear all data
     setAlerts([]); // Clear alerts
     previousIndicatorDataRef.current = {}; // Reset previous indicator data for all assets
+    setTargetLineValues({}); // Clear target lines as well
   }, []);
 
   const dismissAlert = useCallback((id: string) => {
@@ -221,6 +235,29 @@ const App: React.FC = () => {
     };
   }, [selectedTimeframe, handleNewCandle, selectedAsset]); // Re-run when timeframe changes
 
+  // Effect to update the dynamic target line every 90 seconds (independent of chart timeframe)
+  useEffect(() => {
+    const targetUpdateInterval = setInterval(() => {
+      setTargetLineValues(prevTargets => {
+        const newTargets = { ...prevTargets };
+        MOCK_ASSETS.forEach(asset => {
+          const assetCandleData = allAssetsData[asset]?.candleData;
+          if (assetCandleData && assetCandleData.length > 0) {
+            const latestCandle = assetCandleData[assetCandleData.length - 1];
+            // Simple Classic Pivot Point calculation for demonstration
+            const pivot = (latestCandle.high + latestCandle.low + latestCandle.close) / 3;
+            newTargets[asset] = parseFloat(pivot.toFixed(2));
+          } else {
+            newTargets[asset] = null;
+          }
+        });
+        return newTargets;
+      });
+    }, TIMEFRAME_OPTIONS['90s']); // Use the 90s timeframe constant for the interval
+
+    return () => clearInterval(targetUpdateInterval);
+  }, [allAssetsData]); // Rerun when allAssetsData changes (new candles arrive)
+
   const currentAssetData = allAssetsData[selectedAsset] || {
     candleData: [],
     indicatorData: [],
@@ -229,6 +266,7 @@ const App: React.FC = () => {
 
   const latestCandle = currentAssetData.candleData.length > 0 ? currentAssetData.candleData[currentAssetData.candleData.length - 1] : null;
   const latestIndicators = currentAssetData.indicatorData.length > 0 ? currentAssetData.indicatorData[currentAssetData.indicatorData.length - 1] : null;
+  const currentTargetLineValue = targetLineValues[selectedAsset];
 
   return (
     <div className="min-h-screen flex flex-col items-center p-4 bg-gray-900 text-gray-100">
@@ -276,10 +314,11 @@ const App: React.FC = () => {
                 supportResistance={currentAssetData.supportResistance}
                 alerts={alerts} // Pass all alerts
                 selectedAsset={selectedAsset} // Pass selected asset to filter alerts in Chart
+                targetLineValue={currentTargetLineValue} // Pass the target line value
               />
             ) : (
               <div className="h-80 md:h-[400px] lg:h-[500px] bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Loading chart data for {selectedAsset} ({selectedTimeframe})...</p>
+                <p className="text-gray-400 text-lg">Loading chart data for {selectedAsset} ({selectedTimeframe})..</p>
               </div>
             )}
           </section>
@@ -322,6 +361,14 @@ const App: React.FC = () => {
                     {currentAssetData.supportResistance.resistance !== null ? currentAssetData.supportResistance.resistance.toFixed(2) : 'N/A'}
                   </span>
                 </p>
+                {currentTargetLineValue !== null && (
+                  <p>
+                    Target Line:{' '}
+                    <span className="font-medium text-yellow-500">
+                      {currentTargetLineValue.toFixed(2)}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
 

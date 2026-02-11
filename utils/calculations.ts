@@ -258,6 +258,7 @@ export function checkForSellPutAlert(
   const closeBelowPrevLow = currentCandle.close < prevCandle.low;
   // 7. Volume greater than average of last X candles (optional but recommended)
   const currentVolume = currentCandle.volume;
+  // Fix: Changed 'VOLUME_AVERAGE_AVERAGE_PERIOD' to 'VOLUME_AVERAGE_PERIOD'
   const avgVolume = getAverageVolume(previousCandles, VOLUME_AVERAGE_PERIOD);
   const highVolume = currentVolume > avgVolume * 1.2; // 20% higher than average
 
@@ -329,6 +330,54 @@ export function checkForEarlyPullbackAlert(
   return null; // No clear directional pullback detected despite touching EMA20
 }
 
+/**
+ * Generates an alert when price strongly breaks through the target line, confirming direction.
+ */
+export function checkForTargetLineConfirmationAlert(
+  asset: string,
+  currentCandle: CandleData,
+  previousCandles: CandleData[],
+  targetLineValue: number | null,
+): Alert | null {
+  // Need a valid target line and enough previous candles to determine "strong" movement
+  if (targetLineValue === null || previousCandles.length < STRONG_CANDLE_BODY_LOOKBACK) {
+    return null;
+  }
+
+  const prevCandle = previousCandles[previousCandles.length - 1];
+
+  // Bullish Confirmation: Current candle closed above target, previous closed below, and it's a strong green candle
+  if (
+    currentCandle.close > targetLineValue &&
+    prevCandle.close < targetLineValue &&
+    isStrongGreenCandle(currentCandle, previousCandles, STRONG_CANDLE_BODY_LOOKBACK)
+  ) {
+    return {
+      id: `target-confirm-bullish-${asset}-${currentCandle.timestamp}`,
+      type: AlertType.TARGET_LINE_CONFIRMATION_BULLISH,
+      message: `🎯 Confirmação BULLISH no Alvo: Preço rompeu acima da linha alvo!`,
+      timestamp: currentCandle.timestamp,
+      asset,
+    };
+  }
+
+  // Bearish Confirmation: Current candle closed below target, previous closed above, and it's a strong red candle
+  if (
+    currentCandle.close < targetLineValue &&
+    prevCandle.close > targetLineValue &&
+    isStrongRedCandle(currentCandle, previousCandles, STRONG_CANDLE_BODY_LOOKBACK)
+  ) {
+    return {
+      id: `target-confirm-bearish-${asset}-${currentCandle.timestamp}`,
+      type: AlertType.TARGET_LINE_CONFIRMATION_BEARISH,
+      message: `🎯 Confirmação BEARISH no Alvo: Preço rompeu abaixo da linha alvo!`,
+      timestamp: currentCandle.timestamp,
+      asset,
+    };
+  }
+
+  return null;
+}
 
 /**
  * Calculates all required indicators (EMA, S/R) for a given set of candle data.

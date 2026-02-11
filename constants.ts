@@ -29,6 +29,8 @@ export const ALERT_MESSAGES: Record<AlertType, string> = {
   [AlertType.EARLY_PULLBACK_EMA20]: '⚠️ Alerta de Pullback Antecipado na EMA 20', // Generic, might be phased out
   [AlertType.EARLY_PULLBACK_EMA20_BULLISH]: '🟢 Pullback BULLISH na EMA 20: Potencial de alta!',
   [AlertType.EARLY_PULLBACK_EMA20_BEARISH]: '🔴 Pullback BEARISH na EMA 20: Potencial de baixa!',
+  [AlertType.TARGET_LINE_CONFIRMATION_BULLISH]: '🎯 Confirmação BULLISH no Alvo: Preço rompeu acima da linha alvo!',
+  [AlertType.TARGET_LINE_CONFIRMATION_BEARISH]: '🎯 Confirmação BEARISH no Alvo: Preço rompeu abaixo da linha alvo!',
 };
 
 // Audio assets for alerts

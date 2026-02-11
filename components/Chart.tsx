@@ -21,6 +21,7 @@ interface ChartProps {
   supportResistance: SupportResistance;
   alerts: Alert[]; // New prop for displaying alerts
   selectedAsset: string; // New prop to filter alerts for the current chart
+  targetLineValue?: number | null; // New prop for the dynamic target line
 }
 
 interface CustomTooltipProps {
@@ -59,6 +60,10 @@ const getAlertColor = (type: AlertType) => {
       return '#EF4444'; // Tailwind red-500
     case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
       return '#F59E0B'; // Tailwind yellow-500
+    case AlertType.TARGET_LINE_CONFIRMATION_BULLISH:
+      return '#A78BFA'; // Tailwind purple-400 (lighter purple)
+    case AlertType.TARGET_LINE_CONFIRMATION_BEARISH:
+      return '#6D28D9'; // Tailwind purple-800 (darker purple)
     default:
       return '#60A5FA'; // Default blue
   }
@@ -76,12 +81,16 @@ const getAlertLabel = (type: AlertType) => {
       return 'BEAR'; // Label for bearish pullback
     case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
       return 'PULLBACK';
+    case AlertType.TARGET_LINE_CONFIRMATION_BULLISH:
+      return 'TARGET BULL';
+    case AlertType.TARGET_LINE_CONFIRMATION_BEARISH:
+      return 'TARGET BEAR';
     default:
       return '';
   }
 };
 
-const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResistance, alerts, selectedAsset }) => {
+const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResistance, alerts, selectedAsset, targetLineValue }) => {
   // Combine candleData and indicatorData for Recharts
   const chartData = candleData.map((candle, index) => ({
     ...candle,
@@ -206,6 +215,17 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             />
           )}
 
+          {/* Dynamic Target Line */}
+          {targetLineValue !== null && (
+            <ReferenceLine
+              y={targetLineValue}
+              label={{ value: `Alvo: ${targetLineValue}`, position: 'insideTopRight', fill: '#F59E0B', fontSize: 10 }}
+              stroke="#F59E0B"
+              strokeDasharray="5 5"
+              yAxisId="price" // Link to price axis
+            />
+          )}
+
           {/* Alert Markers */}
           {filteredAlerts.map(alert => (
             <ReferenceDot
@@ -213,7 +233,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
               x={alert.timestamp}
               y={
                 candleData.find(c => c.timestamp === alert.timestamp)?.close ||
-                (alert.type === AlertType.BUY_CALL || alert.type === AlertType.EARLY_PULLBACK_EMA20_BULLISH
+                (alert.type === AlertType.BUY_CALL || alert.type === AlertType.EARLY_PULLBACK_EMA20_BULLISH || alert.type === AlertType.TARGET_LINE_CONFIRMATION_BULLISH
                   ? Math.max(...candleData.map(c => c.high)) * 0.99
                   : Math.min(...candleData.map(c => c.low)) * 1.01) // Fallback if candle not found
               }
