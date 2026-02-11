@@ -283,34 +283,50 @@ export function checkForSellPutAlert(
 }
 
 /**
- * Generates an Early Pullback Alert if price touches EMA20.
+ * Generates an Early Pullback Alert if price touches EMA20, specifying direction.
  */
 export function checkForEarlyPullbackAlert(
   asset: string,
   currentCandle: CandleData,
+  previousCandles: CandleData[],
   currentIndicators: IndicatorData,
 ): Alert | null {
   const { ema20 } = currentIndicators;
 
-  if (!ema20) return null;
+  if (!ema20 || previousCandles.length < 1) return null; // Need at least one previous candle for context
 
-  // Check if current candle's low touched or went below EMA20 (potential bullish pullback)
-  const bullishTouch = currentCandle.low <= ema20 && currentCandle.high >= ema20;
-  // Check if current candle's high touched or went above EMA20 (potential bearish pullback)
-  const bearishTouch = currentCandle.high >= ema20 && currentCandle.low <= ema20;
+  const prevCandle = previousCandles[previousCandles.length - 1];
+  const threshold = 0.0005; // Small percentage for "touch" proximity
 
-  if (bullishTouch || bearishTouch) {
-    // Determine the direction for a more specific message if needed, but for now, generic
+  // Check if current candle's range "touches" EMA20
+  const candleTouchesEma20 =
+    (currentCandle.low <= ema20 + (ema20 * threshold) && currentCandle.high >= ema20 - (ema20 * threshold));
+
+  if (!candleTouchesEma20) return null;
+
+  // Determine direction based on where the close is relative to the EMA20 and previous candle
+  const isBullishPullback = currentCandle.close > ema20 && currentCandle.close > prevCandle.close;
+  const isBearishPullback = currentCandle.close < ema20 && currentCandle.close < prevCandle.close;
+
+  if (isBullishPullback) {
     return {
-      id: `early-pullback-ema20-${asset}-${currentCandle.timestamp}`,
-      type: AlertType.EARLY_PULLBACK_EMA20,
-      message: '⚠️ Alerta de Pullback Antecipado na EMA 20',
+      id: `early-pullback-ema20-bullish-${asset}-${currentCandle.timestamp}`,
+      type: AlertType.EARLY_PULLBACK_EMA20_BULLISH,
+      message: '🟢 Pullback BULLISH na EMA 20: Potencial de alta!',
+      timestamp: currentCandle.timestamp,
+      asset,
+    };
+  } else if (isBearishPullback) {
+    return {
+      id: `early-pullback-ema20-bearish-${asset}-${currentCandle.timestamp}`,
+      type: AlertType.EARLY_PULLBACK_EMA20_BEARISH,
+      message: '🔴 Pullback BEARISH na EMA 20: Potencial de baixa!',
       timestamp: currentCandle.timestamp,
       asset,
     };
   }
 
-  return null;
+  return null; // No clear directional pullback detected despite touching EMA20
 }
 
 

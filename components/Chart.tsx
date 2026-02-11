@@ -10,6 +10,7 @@ import {
   Line,
   ReferenceLine,
   ReferenceDot,
+  Bar, // Import Bar component for volume
 } from 'recharts';
 import { CandleData, IndicatorData, SupportResistance, Alert, AlertType } from '../types';
 import { format } from 'date-fns';
@@ -51,10 +52,12 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
 const getAlertColor = (type: AlertType) => {
   switch (type) {
     case AlertType.BUY_CALL:
+    case AlertType.EARLY_PULLBACK_EMA20_BULLISH: // Green for bullish pullback
       return '#10B981'; // Tailwind green-500
     case AlertType.SELL_PUT:
+    case AlertType.EARLY_PULLBACK_EMA20_BEARISH: // Red for bearish pullback
       return '#EF4444'; // Tailwind red-500
-    case AlertType.EARLY_PULLBACK_EMA20:
+    case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
       return '#F59E0B'; // Tailwind yellow-500
     default:
       return '#60A5FA'; // Default blue
@@ -67,7 +70,11 @@ const getAlertLabel = (type: AlertType) => {
       return 'BUY';
     case AlertType.SELL_PUT:
       return 'SELL';
-    case AlertType.EARLY_PULLBACK_EMA20:
+    case AlertType.EARLY_PULLBACK_EMA20_BULLISH:
+      return 'BULL'; // Label for bullish pullback
+    case AlertType.EARLY_PULLBACK_EMA20_BEARISH:
+      return 'BEAR'; // Label for bearish pullback
+    case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
       return 'PULLBACK';
     default:
       return '';
@@ -106,6 +113,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             tick={{ fill: '#bbb', fontSize: 10 }}
             interval="preserveStart"
           />
+          {/* Y-Axis for Price */}
           <YAxis
             type="number"
             domain={yDomain as [number, number]}
@@ -113,7 +121,19 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             stroke="#999"
             tick={{ fill: '#bbb', fontSize: 10 }}
             orientation="right"
+            yAxisId="price" // Assign ID for price axis
           />
+          {/* Y-Axis for Volume */}
+          <YAxis
+            type="number"
+            orientation="left"
+            stroke="#888" // Slightly different color for volume axis
+            tick={{ fill: '#bbb', fontSize: 10 }}
+            yAxisId="volume" // Assign ID for volume axis
+            domain={[0, 'auto']} // Volume always starts from 0
+            allowDecimals={false}
+          />
+
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ paddingTop: '10px', color: '#ccc' }} />
 
@@ -125,6 +145,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             strokeWidth={1}
             dot={false}
             name="Price"
+            yAxisId="price" // Link to price axis
           />
 
           {/* EMA Lines */}
@@ -135,6 +156,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             strokeWidth={1.5}
             dot={false}
             name="EMA 10"
+            yAxisId="price" // Link to price axis
           />
           <Line
             type="monotone"
@@ -143,6 +165,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             strokeWidth={1.5}
             dot={false}
             name="EMA 20"
+            yAxisId="price" // Link to price axis
           />
           <Line
             type="monotone"
@@ -151,6 +174,16 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
             strokeWidth={1.5}
             dot={false}
             name="EMA 50"
+            yAxisId="price" // Link to price axis
+          />
+
+          {/* Volume Bars */}
+          <Bar
+            dataKey="volume"
+            fill="#4A5568" // Darker gray for volume bars
+            opacity={0.6}
+            name="Volume"
+            yAxisId="volume" // Link to volume axis
           />
 
           {/* Support and Resistance Lines */}
@@ -160,6 +193,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
               label={{ value: `S: ${supportResistance.support}`, position: 'insideTopLeft', fill: '#84cc16', fontSize: 10 }}
               stroke="#84cc16"
               strokeDasharray="3 3"
+              yAxisId="price" // Link to price axis
             />
           )}
           {supportResistance.resistance !== null && (
@@ -168,6 +202,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
               label={{ value: `R: ${supportResistance.resistance}`, position: 'insideBottomLeft', fill: '#ef4444', fontSize: 10 }}
               stroke="#ef4444"
               strokeDasharray="3 3"
+              yAxisId="price" // Link to price axis
             />
           )}
 
@@ -178,7 +213,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
               x={alert.timestamp}
               y={
                 candleData.find(c => c.timestamp === alert.timestamp)?.close ||
-                (alert.type === AlertType.BUY_CALL
+                (alert.type === AlertType.BUY_CALL || alert.type === AlertType.EARLY_PULLBACK_EMA20_BULLISH
                   ? Math.max(...candleData.map(c => c.high)) * 0.99
                   : Math.min(...candleData.map(c => c.low)) * 1.01) // Fallback if candle not found
               }
@@ -188,6 +223,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
               strokeWidth={2}
               isFront={true}
               className="z-20"
+              yAxisId="price" // Link to price axis
             >
               <text x={0} y={-10} fill={getAlertColor(alert.type)} textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight="bold">
                 {getAlertLabel(alert.type)}

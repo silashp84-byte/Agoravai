@@ -24,8 +24,11 @@ const AlertDisplay: React.FC<AlertDisplayProps> = ({ alerts, onDismissAlert }) =
         return 'bg-green-700 bg-opacity-30 border-green-600';
       case AlertType.SELL_PUT:
         return 'bg-red-700 bg-opacity-30 border-red-600';
-      case AlertType.EARLY_PULLBACK_EMA20:
-        return 'bg-yellow-700 bg-opacity-30 border-yellow-600';
+      case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
+      case AlertType.EARLY_PULLBACK_EMA20_BULLISH:
+        return 'bg-green-700 bg-opacity-30 border-green-600'; // Bullish pullback
+      case AlertType.EARLY_PULLBACK_EMA20_BEARISH:
+        return 'bg-red-700 bg-opacity-30 border-red-600'; // Bearish pullback
       default:
         return 'bg-blue-700 bg-opacity-30 border-blue-600';
     }

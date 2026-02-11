@@ -7,7 +7,7 @@ import AlertDisplay from './components/AlertDisplay';
 import { getInitialCandleData, subscribeToMarketData, unsubscribeFromMarketData } from './services/marketDataService';
 import { calculateAllIndicators, checkForBuyCallAlert, checkForSellPutAlert, checkForEarlyPullbackAlert } from './utils/calculations';
 import { CandleData, IndicatorData, SupportResistance, Alert, AlertType, AssetMonitorState } from './types';
-import { MOCK_ASSETS, CHART_DATA_LIMIT, TIMEFRAME_OPTIONS, ALERT_SOUND_PATH } from './constants';
+import { MOCK_ASSETS, CHART_DATA_LIMIT, TIMEFRAME_OPTIONS, ALERT_SOUND_PATH, ALERT_DURATION_MS } from './constants';
 import { format } from 'date-fns';
 
 // Fix: Define SubscriptionHandle type to explicitly match what unsubscribeFromMarketData expects
@@ -71,12 +71,23 @@ const App: React.FC = () => {
 
     // Sound Alert
     if (enableSoundAlerts) {
-      alertAudioRef.current?.play().catch(e => console.error("Error playing sound:", e));
+      if (alertAudioRef.current) {
+        alertAudioRef.current.currentTime = 0; // Rewind to start
+        alertAudioRef.current.play().catch(e => console.error("Error playing sound:", e));
+
+        // Stop after ALERT_DURATION_MS if still playing
+        setTimeout(() => {
+          if (alertAudioRef.current) {
+            alertAudioRef.current.pause();
+            alertAudioRef.current.currentTime = 0; // Reset for next play
+          }
+        }, ALERT_DURATION_MS);
+      }
     }
 
     // Vibration Alert
     if (enableVibrationAlerts && 'vibrate' in navigator) {
-      navigator.vibrate(500); // Vibrate for 500ms
+      navigator.vibrate(ALERT_DURATION_MS); // Vibrate for ALERT_DURATION_MS
     }
   }, [enablePushNotifications, enableSoundAlerts, enableVibrationAlerts]);
 
@@ -105,10 +116,10 @@ const App: React.FC = () => {
       const { indicators, supportResistance: sr } = calculateAllIndicators(updatedCandleData);
       const currentIndicator = indicators.length > 0 ? indicators[indicators.length - 1] : null;
       const prevIndicator = previousIndicatorDataRef.current[asset] || null;
+      const previousCandles = updatedCandleData.slice(0, -1); // All candles except the very last one (newCandle)
 
       // Check for alerts for this asset
       if (currentIndicator && updatedCandleData.length > 1) { // Ensure enough data for checks
-        const previousCandles = updatedCandleData.slice(0, -1);
         
         if (prevIndicator) {
           const buyCallAlert = checkForBuyCallAlert(asset, newCandle, previousCandles, currentIndicator, prevIndicator);
@@ -119,7 +130,8 @@ const App: React.FC = () => {
         }
 
         if (enableEarlyPullbackAlerts) {
-          const earlyPullbackAlert = checkForEarlyPullbackAlert(asset, newCandle, currentIndicator);
+          // Pass previousCandles for context to determine pullback direction
+          const earlyPullbackAlert = checkForEarlyPullbackAlert(asset, newCandle, previousCandles, currentIndicator);
           if (earlyPullbackAlert) addAlert(earlyPullbackAlert);
         }
       }

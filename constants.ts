@@ -13,7 +13,7 @@ export const STRONG_CANDLE_BODY_LOOKBACK = 3; // Number of previous candles to c
 export const VOLUME_AVERAGE_PERIOD = 10; // Number of previous candles for average volume calculation
 
 // Updated mock assets to focus on Forex and Crypto
-export const MOCK_ASSETS: string[] = ['BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'];
+export const MOCK_ASSETS: string[] = ['BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'ETCUSDT'];
 export const CHART_DATA_LIMIT = 100; // Max number of candles to show on the chart
 
 export const TIMEFRAME_OPTIONS = {
@@ -26,8 +26,12 @@ export const TIMEFRAME_OPTIONS = {
 export const ALERT_MESSAGES: Record<AlertType, string> = {
   [AlertType.BUY_CALL]: '📈 Entrada CALL detectada – tendência confirmada',
   [AlertType.SELL_PUT]: '📉 Entrada PUT detectada – tendência confirmada',
-  [AlertType.EARLY_PULLBACK_EMA20]: '⚠️ Alerta de Pullback Antecipado na EMA 20',
+  [AlertType.EARLY_PULLBACK_EMA20]: '⚠️ Alerta de Pullback Antecipado na EMA 20', // Generic, might be phased out
+  [AlertType.EARLY_PULLBACK_EMA20_BULLISH]: '🟢 Pullback BULLISH na EMA 20: Potencial de alta!',
+  [AlertType.EARLY_PULLBACK_EMA20_BEARISH]: '🔴 Pullback BEARISH na EMA 20: Potencial de baixa!',
 };
 
 // Audio assets for alerts
 export const ALERT_SOUND_PATH = '/alert.mp3'; // You would need to provide an actual audio file
+
+export const ALERT_DURATION_MS = 2 * 1000; // 2 seconds for alert sound/vibration

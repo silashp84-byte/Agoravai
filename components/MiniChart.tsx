@@ -14,10 +14,12 @@ interface MiniChartProps {
 const getAlertColor = (type: AlertType) => {
   switch (type) {
     case AlertType.BUY_CALL:
+    case AlertType.EARLY_PULLBACK_EMA20_BULLISH: // Green for bullish pullback
       return '#10B981'; // Tailwind green-500
     case AlertType.SELL_PUT:
+    case AlertType.EARLY_PULLBACK_EMA20_BEARISH: // Red for bearish pullback
       return '#EF4444'; // Tailwind red-500
-    case AlertType.EARLY_PULLBACK_EMA20:
+    case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
       return '#F59E0B'; // Tailwind yellow-500
     default:
       return '#60A5FA'; // Default blue

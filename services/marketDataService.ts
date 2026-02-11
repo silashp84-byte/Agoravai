@@ -1,4 +1,3 @@
-
 import { CandleData } from '../types';
 
 const INITIAL_PRICE_RANGE = { min: 100, max: 200 };
@@ -17,13 +16,19 @@ export function generateMockCandle(previousClose: number, timestamp: number): Ca
   const finalHigh = Math.max(open, high, low, close);
   const finalLow = Math.min(open, high, low, close);
 
+  // Calculate volume based on candle range (high - low) for more dynamic numbers
+  const candleRange = finalHigh - finalLow;
+  const baseVolume = Math.floor(Math.random() * 500) + 100; // Base random volume
+  const rangeVolume = Math.floor(candleRange * 500); // Scale range to influence volume
+  const volume = baseVolume + rangeVolume;
+
   return {
     timestamp,
     open: parseFloat(open.toFixed(2)),
     high: parseFloat(finalHigh.toFixed(2)),
     low: parseFloat(finalLow.toFixed(2)),
     close: parseFloat(close.toFixed(2)),
-    volume: Math.floor(Math.random() * 1000) + 100,
+    volume: volume,
   };
 }
 

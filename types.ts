@@ -1,5 +1,4 @@
 
-
 export interface CandleData {
   timestamp: number;
   open: number;
@@ -23,7 +22,9 @@ export interface SupportResistance {
 export enum AlertType {
   BUY_CALL = 'BUY_CALL',
   SELL_PUT = 'SELL_PUT',
-  EARLY_PULLBACK_EMA20 = 'EARLY_PULLBACK_EMA20',
+  EARLY_PULLBACK_EMA20 = 'EARLY_PULLBACK_EMA20', // Generic, might be phased out or used as fallback
+  EARLY_PULLBACK_EMA20_BULLISH = 'EARLY_PULLBACK_EMA20_BULLISH',
+  EARLY_PULLBACK_EMA20_BEARISH = 'EARLY_PULLBACK_EMA20_BEARISH',
 }
 
 export interface Alert {
