@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   ResponsiveContainer,
@@ -10,14 +9,17 @@ import {
   CartesianGrid,
   Line,
   ReferenceLine,
+  ReferenceDot,
 } from 'recharts';
-import { CandleData, IndicatorData, SupportResistance } from '../types';
+import { CandleData, IndicatorData, SupportResistance, Alert, AlertType } from '../types';
 import { format } from 'date-fns';
 
 interface ChartProps {
   candleData: CandleData[];
   indicatorData: IndicatorData[];
   supportResistance: SupportResistance;
+  alerts: Alert[]; // New prop for displaying alerts
+  selectedAsset: string; // New prop to filter alerts for the current chart
 }
 
 interface CustomTooltipProps {
@@ -46,7 +48,33 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label })
   return null;
 };
 
-const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResistance }) => {
+const getAlertColor = (type: AlertType) => {
+  switch (type) {
+    case AlertType.BUY_CALL:
+      return '#10B981'; // Tailwind green-500
+    case AlertType.SELL_PUT:
+      return '#EF4444'; // Tailwind red-500
+    case AlertType.EARLY_PULLBACK_EMA20:
+      return '#F59E0B'; // Tailwind yellow-500
+    default:
+      return '#60A5FA'; // Default blue
+  }
+};
+
+const getAlertLabel = (type: AlertType) => {
+  switch (type) {
+    case AlertType.BUY_CALL:
+      return 'BUY';
+    case AlertType.SELL_PUT:
+      return 'SELL';
+    case AlertType.EARLY_PULLBACK_EMA20:
+      return 'PULLBACK';
+    default:
+      return '';
+  }
+};
+
+const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResistance, alerts, selectedAsset }) => {
   // Combine candleData and indicatorData for Recharts
   const chartData = candleData.map((candle, index) => ({
     ...candle,
@@ -58,6 +86,9 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
     Math.min(...candleData.map(c => c.low).filter(v => typeof v === 'number')) * 0.99,
     Math.max(...candleData.map(c => c.high).filter(v => typeof v === 'number')) * 1.01,
   ];
+
+  // Filter alerts relevant to the currently displayed asset
+  const filteredAlerts = alerts.filter(alert => alert.asset === selectedAsset);
 
   return (
     <div className="w-full h-80 md:h-[400px] lg:h-[500px] bg-gray-800 rounded-lg shadow-xl p-4">
@@ -86,13 +117,7 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ paddingTop: '10px', color: '#ccc' }} />
 
-          {/* Candlestick visualization */}
-          {/* Recharts does not have a native Candlestick component, so we use Lines to represent. */}
-          {/* This is a common workaround; for a true candlestick, a custom shape would be needed
-              or using a library like react-financial-charts. For simplicity, we'll draw open/close lines. */}
-          {/* For basic representation, we'll just plot the close price line for now,
-              and rely on the tooltip to show OHLC.
-              A full candlestick requires custom rendering or another library. */}
+          {/* Candlestick visualization (simplified to close price line) */}
           <Line
             type="monotone"
             dataKey="close"
@@ -145,6 +170,30 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
               strokeDasharray="3 3"
             />
           )}
+
+          {/* Alert Markers */}
+          {filteredAlerts.map(alert => (
+            <ReferenceDot
+              key={alert.id}
+              x={alert.timestamp}
+              y={
+                candleData.find(c => c.timestamp === alert.timestamp)?.close ||
+                (alert.type === AlertType.BUY_CALL
+                  ? Math.max(...candleData.map(c => c.high)) * 0.99
+                  : Math.min(...candleData.map(c => c.low)) * 1.01) // Fallback if candle not found
+              }
+              r={6} // radius of the dot
+              fill={getAlertColor(alert.type)}
+              stroke={getAlertColor(alert.type)}
+              strokeWidth={2}
+              isFront={true}
+              className="z-20"
+            >
+              <text x={0} y={-10} fill={getAlertColor(alert.type)} textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight="bold">
+                {getAlertLabel(alert.type)}
+              </text>
+            </ReferenceDot>
+          ))}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

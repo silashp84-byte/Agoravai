@@ -1,5 +1,4 @@
 
-
 import { AlertType } from './types';
 
 export const EMA_PERIODS = {
@@ -19,6 +18,7 @@ export const CHART_DATA_LIMIT = 100; // Max number of candles to show on the cha
 
 export const TIMEFRAME_OPTIONS = {
   '1m': 60 * 1000,
+  '90s': 90 * 1000, // New option for 90 seconds
   '3m': 3 * 60 * 1000,
   '5m': 5 * 60 * 1000,
 };

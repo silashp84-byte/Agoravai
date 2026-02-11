@@ -33,3 +33,9 @@ export interface Alert {
   timestamp: number;
   asset: string; // Added for more specific alerts
 }
+
+export interface AssetMonitorState {
+  candleData: CandleData[];
+  indicatorData: IndicatorData[];
+  supportResistance: SupportResistance;
+}
