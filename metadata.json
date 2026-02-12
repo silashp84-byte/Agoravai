@@ -1,5 +1,5 @@
 {
-  "name": "Real-time Trading Monitor",
+  "name": "Real-time Trading Monitor03",
   "description": "A React web application for real-time asset monitoring and technical pattern alerts. It displays candlestick charts with EMA 10, 20, and 50 indicators, automatic support and resistance levels, and triggers alerts for bullish EMA crossovers.",
   "requestFramePermissions": []
 }

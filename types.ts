@@ -22,11 +22,27 @@ export interface SupportResistance {
 export enum AlertType {
   BUY_CALL = 'BUY_CALL',
   SELL_PUT = 'SELL_PUT',
-  EARLY_PULLBACK_EMA20 = 'EARLY_PULLBACK_EMA20', // Generic, might be phased out or used as fallback
+  EARLY_PULLBACK_EMA20 = 'EARLY_PULLBACK_EMA20',
   EARLY_PULLBACK_EMA20_BULLISH = 'EARLY_PULLBACK_EMA20_BULLISH',
   EARLY_PULLBACK_EMA20_BEARISH = 'EARLY_PULLBACK_EMA20_BEARISH',
   TARGET_LINE_CONFIRMATION_BULLISH = 'TARGET_LINE_CONFIRMATION_BULLISH',
   TARGET_LINE_CONFIRMATION_BEARISH = 'TARGET_LINE_CONFIRMATION_BEARISH',
+  TARGET_FOLLOW_THROUGH_BULLISH = 'TARGET_FOLLOW_THROUGH_BULLISH',
+  TARGET_FOLLOW_THROUGH_BEARISH = 'TARGET_FOLLOW_THROUGH_BEARISH',
+}
+
+export enum MarketCycle {
+  BULLISH = 'BULLISH',
+  BEARISH = 'BEARISH',
+  NEUTRAL = 'NEUTRAL',
+  EARLY_BULLISH = 'EARLY_BULLISH',
+  EARLY_BEARISH = 'EARLY_BEARISH',
+}
+
+export interface TargetLevels {
+  pivot: number | null;
+  r1: number | null;
+  s1: number | null;
 }
 
 export interface Alert {
@@ -34,11 +50,13 @@ export interface Alert {
   type: AlertType;
   message: string;
   timestamp: number;
-  asset: string; // Added for more specific alerts
+  asset: string;
+  breakPriceRegion?: { low: number, high: number, target: number } | null;
 }
 
 export interface AssetMonitorState {
   candleData: CandleData[];
   indicatorData: IndicatorData[];
   supportResistance: SupportResistance;
+  marketCycle: MarketCycle | null; // NEW: Market cycle for the asset
 }

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MiniChart from './MiniChart';
 import { AssetMonitorState, Alert } from '../types';
@@ -25,7 +26,7 @@ const MiniChartGrid: React.FC<MiniChartGridProps> = ({
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {mockAssets.map((asset) => {
           const assetData = allAssetsData[asset];
-          if (!assetData) {
+          if (!assetData || assetData.candleData.length === 0) {
             return (
               <div key={asset} className="bg-gray-700 rounded-lg shadow-md p-4 text-center text-gray-400">
                 Loading {asset}...
@@ -41,6 +42,7 @@ const MiniChartGrid: React.FC<MiniChartGridProps> = ({
               indicatorData={assetData.indicatorData}
               isSelected={asset === selectedAsset}
               assetAlerts={assetSpecificAlerts} // Pass filtered alerts
+              marketCycle={assetData.marketCycle} // NEW: Pass marketCycle
               onClick={onSelectAsset}
             />
           );

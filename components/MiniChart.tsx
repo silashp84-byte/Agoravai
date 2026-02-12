@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, YAxis, XAxis } from 'recharts';
-import { CandleData, IndicatorData, Alert, AlertType } from '../types';
+import { CandleData, IndicatorData, Alert, AlertType, MarketCycle } from '../types';
+import { MARKET_CYCLE_COLORS, MARKET_CYCLE_MESSAGES } from '../constants';
 
 interface MiniChartProps {
   asset: string;
@@ -8,6 +10,7 @@ interface MiniChartProps {
   indicatorData: IndicatorData[];
   isSelected: boolean;
   assetAlerts: Alert[]; // New prop for asset-specific alerts
+  marketCycle: MarketCycle | null; // NEW: Market cycle prop
   onClick: (asset: string) => void;
 }
 
@@ -35,6 +38,7 @@ const MiniChart: React.FC<MiniChartProps> = ({
   indicatorData,
   isSelected,
   assetAlerts, // Destructure new prop
+  marketCycle, // Destructure new prop
   onClick,
 }) => {
   const chartData = candleData.map((candle, index) => ({
@@ -101,6 +105,12 @@ const MiniChart: React.FC<MiniChartProps> = ({
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {/* NEW: Display Market Cycle */}
+      {marketCycle && (
+        <div className={`absolute bottom-2 left-2 px-2 py-1 rounded-full text-xs font-medium text-white ${MARKET_CYCLE_COLORS[marketCycle]}`}>
+          {MARKET_CYCLE_MESSAGES[marketCycle]}
+        </div>
+      )}
     </div>
   );
 };
