@@ -17,18 +17,18 @@ interface MiniChartProps {
 const getAlertColor = (type: AlertType) => {
   switch (type) {
     case AlertType.BUY_CALL:
-    case AlertType.EARLY_PULLBACK_EMA20_BULLISH: // Green for bullish pullback
-      return '#10B981'; // Tailwind green-500
+    case AlertType.EARLY_PULLBACK_EMA20_BULLISH:
+      return '#34D399'; // Emerald-400
     case AlertType.SELL_PUT:
-    case AlertType.EARLY_PULLBACK_EMA20_BEARISH: // Red for bearish pullback
-      return '#EF4444'; // Tailwind red-500
+    case AlertType.EARLY_PULLBACK_EMA20_BEARISH:
+      return '#F472B6'; // Pink-400
     case AlertType.EARLY_PULLBACK_EMA20: // Fallback for generic, if still used
-      return '#F59E0B'; // Tailwind yellow-500
+      return '#FACC15'; // Yellow-300 (neon yellow)
     case AlertType.TARGET_LINE_CONFIRMATION_BULLISH:
     case AlertType.TARGET_LINE_CONFIRMATION_BEARISH:
-      return '#8B5CF6'; // Tailwind purple-500
+      return '#E879F9'; // Fuchsia-400
     default:
-      return '#60A5FA'; // Default blue
+      return '#A1A1AA'; // Gray-400
   }
 };
 
@@ -47,7 +47,7 @@ const MiniChart: React.FC<MiniChartProps> = ({
   }));
 
   const latestPrice = candleData.length > 0 ? candleData[candleData.length - 1].close : 'N/A';
-  const priceColor = candleData.length > 1 && candleData[candleData.length - 1].close > candleData[candleData.length - 2].close ? 'text-green-400' : 'text-red-400';
+  const priceColor = candleData.length > 1 && candleData[candleData.length - 1].close > candleData[candleData.length - 2].close ? 'text-emerald-400' : 'text-pink-400';
 
   // Determine the color for the alert indicator based on the most recent alert type
   const mostRecentAlert = assetAlerts.reduce((latest, current) => 
@@ -58,8 +58,8 @@ const MiniChart: React.FC<MiniChartProps> = ({
 
   return (
     <div
-      className={`relative bg-gray-700 rounded-lg shadow-md p-2 cursor-pointer transition-all duration-200 border-2 ${
-        isSelected ? 'border-blue-500 scale-105' : 'border-transparent hover:border-gray-500'
+      className={`relative bg-green-900 rounded-xl shadow-md p-2 cursor-pointer transition-all duration-200 border-2 ${
+        isSelected ? 'border-yellow-300 scale-105' : 'border-transparent hover:border-yellow-600'
       }`}
       onClick={() => onClick(asset)}
       role="button"
@@ -77,7 +77,7 @@ const MiniChart: React.FC<MiniChartProps> = ({
       )}
 
       <div className="flex justify-between items-center mb-1">
-        <h4 className="text-sm font-semibold text-gray-100">{asset}</h4>
+        <h4 className="text-sm font-semibold text-lime-100">{asset}</h4>
         <span className={`text-sm font-bold ${priceColor}`}>{typeof latestPrice === 'number' ? latestPrice.toFixed(2) : latestPrice}</span>
       </div>
       <div className="h-20 w-full">
@@ -88,7 +88,7 @@ const MiniChart: React.FC<MiniChartProps> = ({
             <Line
               type="monotone"
               dataKey="close"
-              stroke="#60A5FA" // Blue for price
+              stroke="#A7F3D0" // Aqua green for price
               strokeWidth={1}
               dot={false}
               isAnimationActive={false} // Disable animation for performance
@@ -97,7 +97,7 @@ const MiniChart: React.FC<MiniChartProps> = ({
             <Line
               type="monotone"
               dataKey="ema20"
-              stroke="#fb923c" // Orange for EMA 20
+              stroke="#67E8F9" // Cyan for EMA 20
               strokeWidth={1}
               dot={false}
               isAnimationActive={false} // Disable animation for performance

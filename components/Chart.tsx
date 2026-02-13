@@ -21,20 +21,20 @@ const getAlertColor = (type: AlertType) => {
   switch (type) {
     case AlertType.BUY_CALL:
     case AlertType.EARLY_PULLBACK_EMA20_BULLISH:
-      return '#10B981';
+      return '#34D399'; // Emerald-400
     case AlertType.SELL_PUT:
     case AlertType.EARLY_PULLBACK_EMA20_BEARISH:
-      return '#EF4444';
+      return '#F472B6'; // Pink-400
     case AlertType.TARGET_LINE_CONFIRMATION_BULLISH:
-      return '#A78BFA';
+      return '#E879F9'; // Fuchsia-400
     case AlertType.TARGET_LINE_CONFIRMATION_BEARISH:
-      return '#6D28D9';
+      return '#D946EF'; // Fuchsia-500
     case AlertType.TARGET_FOLLOW_THROUGH_BULLISH:
-      return '#C084FC';
+      return '#22D3EE'; // Cyan-400
     case AlertType.TARGET_FOLLOW_THROUGH_BEARISH:
-      return '#4C1D95';
+      return '#06B6D4'; // Cyan-500
     default:
-      return '#60A5FA';
+      return '#A1A1AA'; // Gray-400
   }
 };
 
@@ -59,24 +59,25 @@ const Chart: React.FC<ChartProps> = ({ candleData, indicatorData, supportResista
   const candleWidthMs = TIMEFRAME_OPTIONS[selectedTimeframe];
 
   return (
-    <div className="w-full h-80 md:h-[400px] lg:h-[500px] bg-gray-800 rounded-lg shadow-xl p-4">
+    <div className="w-full h-80 md:h-[400px] lg:h-[500px] bg-green-900 rounded-xl shadow-xl p-4">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-          <XAxis dataKey="timestamp" tickFormatter={(t) => format(new Date(t), 'HH:mm')} minTickGap={30} stroke="#999" tick={{ fill: '#bbb', fontSize: 10 }} />
-          <YAxis type="number" domain={yDomain as [number, number]} orientation="right" yAxisId="price" stroke="#999" tick={{ fill: '#bbb', fontSize: 10 }} />
-          <YAxis type="number" orientation="left" yAxisId="volume" stroke="#555" tick={false} domain={[0, 'auto']} />
-          <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#f9fafb' }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1C3B20" /> {/* Dark green grid */}
+          <XAxis dataKey="timestamp" tickFormatter={(t) => format(new Date(t), 'HH:mm')} minTickGap={30} stroke="#86EFAC" tick={{ fill: '#D9F99D', fontSize: 10 }} /> {/* Light green/lime axis */}
+          <YAxis type="number" domain={yDomain as [number, number]} orientation="right" yAxisId="price" stroke="#86EFAC" tick={{ fill: '#D9F99D', fontSize: 10 }} /> {/* Light green/lime axis */}
+          <YAxis type="number" orientation="left" yAxisId="volume" stroke="#374151" tick={false} domain={[0, 'auto']} /> {/* Darker gray for volume axis */}
+          <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderColor: '#166534', color: '#f9fafb' }} /> {/* Dark bg, green border tooltip */}
           <Legend />
-          <Bar dataKey="volume" fill="#374151" yAxisId="volume" opacity={0.3} name="Volume" />
-          <Line type="monotone" dataKey="close" stroke="#60A5FA" strokeWidth={1.5} dot={false} name="Price" yAxisId="price" />
-          <Line type="monotone" dataKey="ema10" stroke="#a78bfa" strokeWidth={1} dot={false} name="EMA 10" yAxisId="price" />
-          <Line type="monotone" dataKey="ema20" stroke="#fb923c" strokeWidth={1} dot={false} name="EMA 20" yAxisId="price" />
-          {supportResistance.support && <ReferenceLine y={supportResistance.support} stroke="#10B981" strokeDasharray="3 3" yAxisId="price" />}
-          {supportResistance.resistance && <ReferenceLine y={supportResistance.resistance} stroke="#EF4444" strokeDasharray="3 3" yAxisId="price" />}
-          {targetLineValue && <ReferenceLine y={targetLineValue} stroke="#F59E0B" strokeDasharray="5 5" yAxisId="price" label={{ value: 'Pivot', fill: '#F59E0B', fontSize: 10 }} />}
-          {r1 && <ReferenceLine y={r1} stroke="#EC4899" strokeDasharray="5 5" opacity={0.5} yAxisId="price" label={{ value: 'R1', fill: '#EC4899', fontSize: 10 }} />}
-          {s1 && <ReferenceLine y={s1} stroke="#3B82F6" strokeDasharray="5 5" opacity={0.5} yAxisId="price" label={{ value: 'S1', fill: '#3B82F6', fontSize: 10 }} />}
+          <Bar dataKey="volume" fill="#166534" yAxisId="volume" opacity={0.3} name="Volume" /> {/* Dark green volume bars */}
+          <Line type="monotone" dataKey="close" stroke="#A7F3D0" strokeWidth={1.5} dot={false} name="Price" yAxisId="price" /> {/* Aqua green price line */}
+          <Line type="monotone" dataKey="ema10" stroke="#F472B6" strokeWidth={1} dot={false} name="EMA 10" yAxisId="price" /> {/* Pink EMA 10 */}
+          <Line type="monotone" dataKey="ema20" stroke="#67E8F9" strokeWidth={1} dot={false} name="EMA 20" yAxisId="price" /> {/* Cyan EMA 20 */}
+          <Line type="monotone" dataKey="ema50" stroke="#BEF264" strokeWidth={1} dot={false} name="EMA 50" yAxisId="price" /> {/* Lime EMA 50 */}
+          {supportResistance.support && <ReferenceLine y={supportResistance.support} stroke="#22D3EE" strokeDasharray="3 3" yAxisId="price" label={{ value: 'Support', fill: '#22D3EE', fontSize: 10 }} />} {/* Cyan support */}
+          {supportResistance.resistance && <ReferenceLine y={supportResistance.resistance} stroke="#FB7185" strokeDasharray="3 3" yAxisId="price" label={{ value: 'Resistance', fill: '#FB7185', fontSize: 10 }} />} {/* Rose resistance */}
+          {targetLineValue && <ReferenceLine y={targetLineValue} stroke="#FACC15" strokeDasharray="5 5" yAxisId="price" label={{ value: 'Pivot', fill: '#FACC15', fontSize: 10 }} />} {/* Yellow neon pivot */}
+          {r1 && <ReferenceLine y={r1} stroke="#F472B6" strokeDasharray="5 5" opacity={0.7} yAxisId="price" label={{ value: 'R1', fill: '#F472B6', fontSize: 10 }} />} {/* Pink R1 */}
+          {s1 && <ReferenceLine y={s1} stroke="#67E8F9" strokeDasharray="5 5" opacity={0.7} yAxisId="price" label={{ value: 'S1', fill: '#67E8F9', fontSize: 10 }} />} {/* Cyan S1 */}
 
           {filteredAlerts.map(alert => (
             <React.Fragment key={alert.id}>

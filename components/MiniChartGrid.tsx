@@ -19,8 +19,8 @@ const MiniChartGrid: React.FC<MiniChartGridProps> = ({
   mockAssets,
 }) => {
   return (
-    <div className="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
-      <h2 className="text-xl font-semibold text-gray-200 mb-4 border-b border-gray-700 pb-2">
+    <div className="bg-green-900 rounded-xl shadow-md p-4 mb-6">
+      <h2 className="text-xl font-semibold text-lime-100 mb-4 border-b border-green-800 pb-2">
         Monitored Assets
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -28,12 +28,12 @@ const MiniChartGrid: React.FC<MiniChartGridProps> = ({
           const assetData = allAssetsData[asset];
           if (!assetData || assetData.candleData.length === 0) {
             return (
-              <div key={asset} className="bg-gray-700 rounded-lg shadow-md p-4 text-center text-gray-400">
+              <div key={asset} className="bg-green-800 rounded-xl shadow-md p-4 text-center text-gray-400">
                 Loading {asset}...
               </div>
             );
           }
-          const assetSpecificAlerts = allAssetsAlerts.filter(alert => alert.asset === asset); // Filter alerts for this asset
+          const assetSpecificAlerts = allAssetsAlerts.filter(alert => alert.asset === selectedAsset); // Filter alerts for this asset
           return (
             <MiniChart
               key={asset}

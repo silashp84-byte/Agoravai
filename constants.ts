@@ -43,10 +43,10 @@ export const MARKET_CYCLE_MESSAGES: Record<MarketCycle, string> = {
 };
 
 export const MARKET_CYCLE_COLORS: Record<MarketCycle, string> = {
-  [MarketCycle.BULLISH]: 'bg-green-600',
-  [MarketCycle.BEARISH]: 'bg-red-600',
+  [MarketCycle.BULLISH]: 'bg-emerald-600',
+  [MarketCycle.BEARISH]: 'bg-pink-600',
   [MarketCycle.NEUTRAL]: 'bg-gray-500',
-  [MarketCycle.EARLY_BULLISH]: 'bg-yellow-500',
+  [MarketCycle.EARLY_BULLISH]: 'bg-lime-500',
   [MarketCycle.EARLY_BEARISH]: 'bg-orange-500',
 };
 

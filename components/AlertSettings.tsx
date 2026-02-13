@@ -52,47 +52,47 @@ const AlertSettings: React.FC<AlertSettingsProps> = ({
   };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-200 mb-4 border-b border-gray-700 pb-2">
+    <div className="bg-green-900 p-4 rounded-xl shadow-md">
+      <h2 className="text-xl font-semibold text-lime-100 mb-4 border-b border-green-800 pb-2">
         Alert Settings
       </h2>
       <div className="space-y-3">
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            className="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+            className="form-checkbox h-5 w-5 text-lime-400 bg-green-800 border-yellow-300 rounded focus:ring-yellow-400"
             checked={enablePushNotifications}
             onChange={handlePushNotificationToggle}
           />
-          <span className="ml-3 text-gray-300">Enable Push Notifications</span>
+          <span className="ml-3 text-lime-100">Enable Push Notifications</span>
         </label>
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            className="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+            className="form-checkbox h-5 w-5 text-lime-400 bg-green-800 border-yellow-300 rounded focus:ring-yellow-400"
             checked={enableSoundAlerts}
             onChange={(e) => onToggleSoundAlerts(e.target.checked)}
           />
-          <span className="ml-3 text-gray-300">Enable Sound Alerts</span>
+          <span className="ml-3 text-lime-100">Enable Sound Alerts</span>
         </label>
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            className="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+            className="form-checkbox h-5 w-5 text-lime-400 bg-green-800 border-yellow-300 rounded focus:ring-yellow-400"
             checked={enableVibrationAlerts}
             onChange={handleVibrationToggle}
             disabled={!('vibrate' in navigator)}
           />
-          <span className="ml-3 text-gray-300">Enable Vibration Alerts {(!('vibrate' in navigator) && <span className="text-gray-500 text-xs">(Not supported)</span>)}</span>
+          <span className="ml-3 text-lime-100">Enable Vibration Alerts {(!('vibrate' in navigator) && <span className="text-gray-500 text-xs">(Not supported)</span>)}</span>
         </label>
         <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            className="form-checkbox h-5 w-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+            className="form-checkbox h-5 w-5 text-lime-400 bg-green-800 border-yellow-300 rounded focus:ring-yellow-400"
             checked={enableEarlyPullbackAlerts}
             onChange={(e) => onToggleEarlyPullbackAlerts(e.target.checked)}
           />
-          <span className="ml-3 text-gray-300">Enable Early Pullback Alert (EMA 20)</span>
+          <span className="ml-3 text-lime-100">Enable Early Pullback Alert (EMA 20)</span>
         </label>
       </div>
     </div>

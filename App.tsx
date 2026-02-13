@@ -191,6 +191,7 @@ const App: React.FC = () => {
       const initialCandles = getInitialCandleData(asset, CHART_DATA_LIMIT, timeframeMs);
       const { indicators, supportResistance: sr } = calculateAllIndicators(initialCandles);
       const initialPrevIndicators = indicators.length > 0 ? indicators[indicators.length - 1] : null;
+      // Pass null for previous candles to determineMarketCycle on initial load as there's no 'previous candle' yet for the first set
       const initialMarketCycle = initialPrevIndicators ? determineMarketCycle(initialCandles[initialCandles.length - 1], initialPrevIndicators, initialCandles.slice(0, -1), null) : null;
 
       newAllAssetsData[asset] = { candleData: initialCandles, indicatorData: indicators, supportResistance: sr, marketCycle: initialMarketCycle };
@@ -231,16 +232,16 @@ const App: React.FC = () => {
   const currentTargets = targetLevels[selectedAsset] || { pivot: null, r1: null, s1: null };
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-4 bg-gray-900 text-gray-100">
-      <header className="w-full max-w-7xl mb-6 flex flex-col sm:flex-row justify-between items-center bg-gray-800 p-4 rounded-lg shadow-lg z-10 sticky top-4">
-        <h1 className="text-3xl font-bold text-blue-400 mb-4 sm:mb-0">Trading Monitor</h1>
+    <div className="min-h-screen flex flex-col items-center p-4 bg-green-950 text-gray-100">
+      <header className="w-full max-w-7xl mb-6 flex flex-col sm:flex-row justify-between items-center bg-green-900 p-4 rounded-xl shadow-lg z-10 sticky top-4">
+        <h1 className="text-3xl font-bold text-lime-400 mb-4 sm:mb-0">Trading Monitor</h1>
         <div className="flex flex-col md:flex-row items-center gap-4">
           <TimeframeSelector selectedTimeframe={selectedTimeframe} onSelect={handleSelectTimeframe} />
           <div className="flex flex-col text-sm text-right">
             {latestCandle && (
               <>
-                <p>Price ({selectedAsset}): <span className="font-semibold text-yellow-400">{latestCandle.close.toFixed(2)}</span></p>
-                <p className="text-gray-400">Updated: {format(new Date(latestCandle.timestamp), 'HH:mm:ss')}</p>
+                <p>Price ({selectedAsset}): <span className="font-semibold text-lime-400">{latestCandle.close.toFixed(2)}</span></p>
+                <p className="text-yellow-300">Updated: {format(new Date(latestCandle.timestamp), 'HH:mm:ss')}</p>
               </>
             )}
           </div>
@@ -253,30 +254,32 @@ const App: React.FC = () => {
             {currentAssetData.candleData.length > 0 ? (
               <Chart candleData={currentAssetData.candleData} indicatorData={currentAssetData.indicatorData} supportResistance={currentAssetData.supportResistance} alerts={alerts} selectedAsset={selectedAsset} targetLineValue={currentTargets.pivot} r1={currentTargets.r1} s1={currentTargets.s1} selectedTimeframe={selectedTimeframe} />
             ) : (
-              <div className="h-80 md:h-[400px] lg:h-[500px] bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-gray-400 text-lg">Loading {selectedAsset} data...</p>
+              <div className="h-80 md:h-[400px] lg:h-[500px] bg-green-900 rounded-xl flex items-center justify-center">
+                <p className="text-lime-400 text-lg">Loading {selectedAsset} data...</p>
               </div>
             )}
           </section>
           <aside className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-gray-800 p-4 rounded-lg shadow-md text-sm">
-              <h2 className="text-xl font-semibold text-gray-200 mb-4 border-b border-gray-700 pb-2">Targets ({selectedAsset})</h2>
+            {/* Moved AlertDisplay to the top of the right sidebar for prominence */}
+            <AlertDisplay alerts={alerts} onDismissAlert={dismissAlert} alertCounts={alertCounts} />
+            <div className="bg-green-900 p-4 rounded-xl shadow-md text-sm">
+              <h2 className="text-xl font-semibold text-lime-100 mb-4 border-b border-green-800 pb-2">Targets ({selectedAsset})</h2>
               <div className="space-y-2">
                 <p>Resistance 1: <span className="font-medium text-pink-400">{currentTargets.r1?.toFixed(2) || 'N/A'}</span></p>
-                <p>Pivot Point: <span className="font-medium text-yellow-500">{currentTargets.pivot?.toFixed(2) || 'N/A'}</span></p>
-                <p>Support 1: <span className="font-medium text-blue-400">{currentTargets.s1?.toFixed(2) || 'N/A'}</span></p>
+                <p>Pivot Point: <span className="font-medium text-yellow-300">{currentTargets.pivot?.toFixed(2) || 'N/A'}</span></p>
+                <p>Support 1: <span className="font-medium text-cyan-400">{currentTargets.s1?.toFixed(2) || 'N/A'}</span></p>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <p>EMA 10: <span className="text-purple-400">{latestIndicators?.ema10?.toFixed(2) || 'N/A'}</span></p>
-                <p>EMA 20: <span className="text-orange-400">{latestIndicators?.ema20?.toFixed(2) || 'N/A'}</span></p>
+              <div className="mt-4 pt-4 border-t border-green-800">
+                <p>EMA 10: <span className="text-fuchsia-400">{latestIndicators?.ema10?.toFixed(2) || 'N/A'}</span></p>
+                <p>EMA 20: <span className="text-cyan-400">{latestIndicators?.ema20?.toFixed(2) || 'N/A'}</span></p>
+                <p>EMA 50: <span className="text-lime-500">{latestIndicators?.ema50?.toFixed(2) || 'N/A'}</span></p>
               </div>
             </div>
             <AlertSettings enablePushNotifications={enablePushNotifications} onTogglePushNotifications={setEnablePushNotifications} enableSoundAlerts={enableSoundAlerts} onToggleSoundAlerts={setEnableSoundAlerts} enableVibrationAlerts={enableVibrationAlerts} onToggleVibrationAlerts={setEnableVibrationAlerts} enableEarlyPullbackAlerts={enableEarlyPullbackAlerts} onToggleEarlyPullbackAlerts={setEnableEarlyPullbackAlerts} />
-            <AlertDisplay alerts={alerts} onDismissAlert={dismissAlert} alertCounts={alertCounts} />
           </aside>
         </div>
       </main>
-      <footer className="w-full max-w-7xl mt-8 text-center text-gray-500 text-sm p-4 bg-gray-800 rounded-lg shadow-md">&copy; {new Date().getFullYear()} Real-time Trading Monitor.</footer>
+      <footer className="w-full max-w-7xl mt-8 text-center text-yellow-300 text-sm p-4 bg-green-900 rounded-xl shadow-md">&copy; {new Date().getFullYear()} Real-time Trading Monitor.</footer>
     </div>
   );
 };
